@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { validateImport } from '../js/io.js';
+import { validateImport, sanitizeImport } from '../js/io.js';
 
 function validState() {
   return {
@@ -67,28 +67,52 @@ test('ungültige Datums-Keys werden abgelehnt', () => {
   const bad2 = validState();
   bad2.habits.abc.checks = { '2026-13-01': true };
   assert.notStrictEqual(validateImport(bad2), null);
+
+  const bad3 = validState();
+  bad3.habits.abc.checks = { '2026-02-31': true };
+  assert.notStrictEqual(validateImport(bad3), null);
+
+  const bad4 = validState();
+  bad4.habits.abc.checks = { '2026-02-29': true };
+  assert.notStrictEqual(validateImport(bad4), null);
+
+  const bad5 = validState();
+  bad5.habits.abc.checks = { '2024-04-31': true };
+  assert.notStrictEqual(validateImport(bad5), null);
 });
 
-test('Prototype-Pollution-Schlüssel werden rekursiv abgelehnt', () => {
-  const protoKey = JSON.parse('{"habits":{},"settings":{"theme":"light"},"__proto__":{"polluted":true}}');
-  assert.notStrictEqual(validateImport(protoKey), null);
+test('gültige Kalendertage inklusive Schaltjahr werden akzeptiert', () => {
+  const leap = validState();
+  leap.habits.abc.checks = { '2024-02-29': true };
+  assert.strictEqual(validateImport(leap), null);
 
-  const ctorKey = JSON.parse('{"habits":{},"settings":{"theme":"light"},"constructor":{"polluted":true}}');
-  assert.notStrictEqual(validateImport(ctorKey), null);
-
-  const protoInHabit = JSON.parse('{"habits":{"abc":{"id":"a","name":"x","archived":false,"checks":{},"__proto__":{"polluted":true}}},"settings":{"theme":"light"}}');
-  assert.notStrictEqual(validateImport(protoInHabit), null);
-
-  const protoInChecks = JSON.parse('{"habits":{"abc":{"id":"a","name":"x","archived":false,"checks":{"__proto__":{"polluted":true}}}},"settings":{"theme":"light"}}');
-  assert.notStrictEqual(validateImport(protoInChecks), null);
-
-  const protoInHabitsMap = JSON.parse('{"habits":{"__proto__":{"polluted":true}},"settings":{"theme":"light"}}');
-  assert.notStrictEqual(validateImport(protoInHabitsMap), null);
+  const monthEnd = validState();
+  monthEnd.habits.abc.checks = { '2026-01-31': true, '2026-04-30': true, '2026-12-31': true };
+  assert.strictEqual(validateImport(monthEnd), null);
 });
 
-test('ValidateImport lässt keine Pollution auf Object.prototype zu', () => {
-  const before = {}.polluted;
-  const protoInChecks = JSON.parse('{"habits":{"abc":{"id":"a","name":"x","archived":false,"checks":{"__proto__":{"polluted":true}}}},"settings":{"theme":"light"}}');
-  validateImport(protoInChecks);
-  assert.strictEqual({}.polluted, before);
+test('gefährliche Schlüssel werden beim Import entfernt statt abgelehnt', () => {
+  const input = JSON.parse(
+    '{"habits":{"abc":{"id":"a","name":"x","archived":false,"checks":{"2026-01-01":true,"__proto__":{"polluted":true}}},"__proto__":{"polluted":true}},"settings":{"theme":"light","constructor":{"polluted":true}},"prototype":{"polluted":true}}'
+  );
+  const cleaned = sanitizeImport(input);
+  assert.strictEqual(validateImport(cleaned), null);
+  assert.deepStrictEqual(Object.keys(cleaned).sort(), ['habits', 'settings']);
+  assert.deepStrictEqual(Object.keys(cleaned.habits).sort(), ['abc']);
+  assert.deepStrictEqual(Object.keys(cleaned.habits.abc).sort(), ['archived', 'checks', 'id', 'name']);
+  assert.deepStrictEqual(Object.keys(cleaned.habits.abc.checks).sort(), ['2026-01-01']);
+  assert.deepStrictEqual(Object.keys(cleaned.settings).sort(), ['theme']);
+});
+
+test('sanitizeImport lässt gültige Daten unverändert', () => {
+  const state = validState();
+  assert.deepStrictEqual(sanitizeImport(state), state);
+  assert.strictEqual(validateImport(sanitizeImport(state)), null);
+});
+
+test('Entfernen gefährlicher Schlüssel polluiert Object.prototype nicht', () => {
+  const input = JSON.parse('{"habits":{},"settings":{"theme":"light"},"__proto__":{"polluted":true}}');
+  sanitizeImport(input);
+  assert.strictEqual({}.polluted, undefined);
+  assert.strictEqual(Object.prototype.polluted, undefined);
 });

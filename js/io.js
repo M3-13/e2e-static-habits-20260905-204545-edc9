@@ -5,13 +5,23 @@ const DANGEROUS_KEYS = ['__proto__', 'constructor', 'prototype'];
 
 const DATE_KEY_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
+function isLeapYear(year) {
+  return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+}
+
+function daysInMonth(year, month) {
+  if (month === 2) return isLeapYear(year) ? 29 : 28;
+  return [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month - 1];
+}
+
 function isValidDateKey(key) {
   const m = DATE_KEY_RE.exec(key);
   if (!m) return false;
+  const year = Number(m[1]);
   const month = Number(m[2]);
   const day = Number(m[3]);
   if (month < 1 || month > 12) return false;
-  if (day < 1 || day > 31) return false;
+  if (day < 1 || day > daysInMonth(year, month)) return false;
   return true;
 }
 
@@ -20,6 +30,21 @@ function hasDangerousKey(obj) {
     if (DANGEROUS_KEYS.includes(key)) return true;
   }
   return false;
+}
+
+export function sanitizeImport(value) {
+  if (Array.isArray(value)) {
+    return value.map(sanitizeImport);
+  }
+  if (value !== null && typeof value === 'object') {
+    const result = {};
+    for (const key of Object.keys(value)) {
+      if (DANGEROUS_KEYS.includes(key)) continue;
+      result[key] = sanitizeImport(value[key]);
+    }
+    return result;
+  }
+  return value;
 }
 
 function isValidHabit(value) {
@@ -110,12 +135,13 @@ function handleImport(raw, state) {
     showMessage('Die Datei konnte nicht als JSON gelesen werden.', true);
     return;
   }
-  const error = validateImport(parsed);
+  const cleaned = sanitizeImport(parsed);
+  const error = validateImport(cleaned);
   if (error !== null) {
     showMessage(error, true);
     return;
   }
-  applyState(state, parsed);
+  applyState(state, cleaned);
   store.save();
   renderHabits(state);
   showMessage('Daten erfolgreich importiert.', false);

@@ -1,0 +1,126 @@
+.habit-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-3);
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+@media (min-width: 1024px) {
+  .habit-card {
+    padding: var(--space-4);
+  }
+}
+
+.habit-card__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.habit-card__name {
+  font-size: 18px;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.habit-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.habit-card__action {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: transparent;
+  color: var(--color-fg);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.habit-card__action:hover {
+  background-color: var(--color-border);
+}
+
+.habit-card__action:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.habit-card__action--danger {
+  color: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.habit-card__action--danger:hover {
+  background-color: var(--color-danger_soft);
+}
+
+.habit-card__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.stat-chip {
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent_soft);
+  color: var(--color-accent_hover);
+  font-size: 12px;
+  font-weight: 600;
+  min-height: 24px;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0);
+}
+
+.habit-card__chart {
+  width: 100%;
+  height: 120px;
+}
+
+.habit-empty {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: var(--space-6) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-3);
+}
+
+.habit-empty__icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-accent_soft);
+  color: var(--color-accent_hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 600;
+}
+
+.habit-empty__title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.habit-empty__text {
+  font-size: 15px;
+  color: var(--color-muted);
+}

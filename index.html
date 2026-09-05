@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Habit-Tracker – Gewohnheiten verwalten, abhaken und auswerten." />
+    <title>Habit-Tracker</title>
+    <link rel="stylesheet" href="css/base.css" />
+  </head>
+  <body>
+    <header class="app-header">
+      <div class="container app-header__inner">
+        <h1 class="app-title">Habit-Tracker</h1>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Farbschema umschalten">
+          <span class="theme-toggle__track" aria-hidden="true">
+            <span class="theme-toggle__thumb"></span>
+          </span>
+        </button>
+      </div>
+    </header>
+
+    <main class="container">
+      <form id="habit-form" class="habit-form" autocomplete="off">
+        <label class="visually-hidden" for="habit-name">Neue Gewohnheit</label>
+        <input id="habit-name" name="habit-name" type="text" placeholder="Neue Gewohnheit ..." />
+        <button class="button button--primary" type="submit">Hinzufügen</button>
+      </form>
+
+      <div class="filters" role="group" aria-label="Gewohnheiten filtern">
+        <button id="filter-active" class="filter-pill filter-pill--active" type="button">Aktiv</button>
+        <button id="filter-archived" class="filter-pill" type="button">Archiviert</button>
+      </div>
+
+      <div id="habit-list" class="habit-list"></div>
+
+      <section class="io-panel" aria-label="Daten sichern und wiederherstellen">
+        <button id="export-button" class="button button--secondary" type="button">Exportieren</button>
+        <button id="import-button" class="button button--secondary" type="button">Importieren</button>
+        <input id="import-input" type="file" accept="application/json" hidden />
+      </section>
+    </main>
+
+    <footer class="app-footer">
+      <div class="container app-footer__inner">
+        <a href="impressum.html">Impressum</a>
+        <a href="datenschutz.html">Datenschutz</a>
+      </div>
+    </footer>
+
+    <script type="module" src="js/store.js"></script>
+    <script type="module" src="js/stats.js"></script>
+    <script type="module" src="js/chart.js"></script>
+    <script type="module" src="js/grid.js"></script>
+    <script type="module" src="js/habits.js"></script>
+    <script type="module" src="js/theme.js"></script>
+    <script type="module" src="js/io.js"></script>
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
